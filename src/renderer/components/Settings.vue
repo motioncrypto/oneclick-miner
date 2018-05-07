@@ -6,7 +6,8 @@
         <b-field label="Which pool do you want to use?">
           <b-select 
           v-model="poolSelected"
-          placeholder="Select a pool">
+          placeholder="Select a pool"
+          @input="poolChanged = true">
             <option
               v-for="pool in pools"
               :value="pool.url"
@@ -100,6 +101,8 @@ export default {
       pools: [],
       customPool: '',
       poolSelected: null,
+      poolSelectedByUser: false,
+      poolChanged: false,
       mineWith: ['gpu'],
       advancedMode: false,
       platform: require('os').platform(),
@@ -114,6 +117,7 @@ export default {
       this.$store.commit('CHANGE_CURRENT_POOL', {
         pool: this.poolSelected,
         customPool: this.customPool,
+        poolSelectedByUser: this.poolChanged,
       });
       this.$store.commit('CHANGE_MINE_WITH', {
         mineWith: this.mineWith,
@@ -142,12 +146,14 @@ export default {
       this.$store.commit('RESET_TO_DEFAULTS');
       this.poolSelected = this.$store.state.Settings.currentPool;
       this.customPool = this.$store.state.Settings.customPool;
+      this.poolSelectedByUser = this.$store.state.Settings.poolSelectedByUser;
       this.mineWith = this.$store.state.Settings.mineWith;
       this.advancedMode = this.$store.state.Settings.advancedMode;
       this.nvidiaMiner = this.$store.state.Settings.nvidiaMiner;
       this.amdMiner = this.$store.state.Settings.amdMiner;
       this.autostartMiner = this.$store.state.Settings.autostart.miner;
       this.autostartWindows = this.$store.state.Settings.autostart.windows;
+      this.getPools();
       this.$toast.open({
         duration: 3000,
         message: 'Settings resetted to defaults',
@@ -166,6 +172,15 @@ export default {
           this.pools = [];
           pools.forEach((pool) => {
             this.pools.push(pool.data());
+
+            if (pool.data().default && !this.poolSelectedByUser) {
+              this.poolSelected = pool.data().url;
+              this.$store.commit('CHANGE_CURRENT_POOL', {
+                pool: this.poolSelected,
+                customPool: this.customPool,
+                poolSelectedByUser: false,
+              });
+            }
           });
         });
     },
@@ -174,6 +189,7 @@ export default {
     this.getPools();
     this.poolSelected = this.$store.state.Settings.currentPool;
     this.customPool = this.$store.state.Settings.customPool;
+    this.poolSelectedByUser = this.$store.state.Settings.poolSelectedByUser;
     this.mineWith = this.$store.state.Settings.mineWith;
     this.advancedMode = this.$store.state.Settings.advancedMode;
     this.nvidiaMiner = this.$store.state.Settings.nvidiaMiner;

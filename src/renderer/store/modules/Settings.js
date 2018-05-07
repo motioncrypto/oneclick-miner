@@ -8,6 +8,7 @@ const minerAutoLauncher = new AutoLaunch({
 const state = {
   currentPool: 'stratum+tcp://eu.bsod.pw:2266',
   customPool: '',
+  poolSelectedByUser: false,
   mineWith: ['gpu'],
   wallet: '',
   advancedMode: false,
@@ -23,6 +24,7 @@ const mutations = {
   CHANGE_CURRENT_POOL(state, payload) {
     state.currentPool = payload.pool;
     state.customPool = payload.customPool;
+    state.poolSelectedByUser = payload.poolSelectedByUser;
   },
   CHANGE_MINE_WITH(state, payload) {
     state.mineWith = payload.mineWith;
@@ -54,11 +56,13 @@ const mutations = {
   RESET_TO_DEFAULTS(state) {
     state.amdMiner = 'avermore';
     state.nvidiaMiner = 'enemy';
+    state.poolSelectedByUser = false;
     state.autostart = {
       miner: false,
       windows: false,
     };
     state.advancedMode = false;
+    state.currentPool = 'stratum+tcp://eu.bsod.pw:2266';
   },
 };
 
