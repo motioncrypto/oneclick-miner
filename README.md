@@ -15,15 +15,19 @@
 #### Troubleshootings
 
 **I do not have a Motion Address**
+
 Please download and install our wallet from [https://motionproject.org](Motion website), then generate a new Motion Address.
 
 **AMD Graphics is cycling and never start to mine**
+
 Please update your drivers.
 
 **Just open a CMD window and stays black**
+
 Please update your drivers.
 
 **Miner crashes with cuda error `cuda_check_cpu_setTarget`**
+
 Please underclock your cards.
 
 #### Development
