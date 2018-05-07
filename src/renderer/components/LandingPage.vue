@@ -138,19 +138,19 @@ export default {
     runAMD(minerPath) {
       const miner = exec(`start cmd.exe /K "set GPU_MAX_ALLOC_PERCENT=100 && \
       set GPU_USE_SYNC_OBJECTS=1 && \
-      set GPU_FORCE_64BIT_PTR=1 && \
+      set GPU_FORCE_64BIT_PTR=0 && \
       set GPU_MAX_HEAP_SIZE=100 && \
       set GPU_SINGLE_ALLOC_PERCENT=100 && \
-      ${path.join(__static, minerPath)}/amd/${this.settings.nvidiaMiner}/miner \
-      -k x16r -g 1 -w 64 \
+      ${path.join(__static, minerPath)}/amd/${this.settings.amdMiner}/miner \
+      --algorithm x16r \
       --api-listen \
       --api-allow W:127.0.0.1 \
       --api-port=4028 \
-      --gpu-platform=1 \
       -o ${this.currentPool} \
-      -O ${this.settings.wallet}:c=MTN \
+      -u ${this.settings.wallet} \
+      -p c=MTN \
       -X 256 \
-      --kernel-path=""${path.join(__static, minerPath)}/amd/${this.settings.nvidiaMiner}/kernel""`);
+      --kernel-path=""${path.join(__static, minerPath)}/amd/${this.settings.amdMiner}/kernel""`);
 
       this.amdInfo = setInterval(() => {
         // eslint-disable-next-line
@@ -187,6 +187,9 @@ export default {
     },
     runNvidia(minerPath) {
       const miner = exec(`start cmd.exe /K "${path.join(__static, minerPath)}/nvidia/${this.settings.nvidiaMiner}/miner \
+        --algo=x16r --url=${this.currentPool} --user=${this.settings.wallet} -b 0.0.0.0:4068 -p c=MTN"`);
+
+      console.log(`start cmd.exe /K "${path.join(__static, minerPath)}/nvidia/${this.settings.nvidiaMiner}/miner \
         --algo=x16r --url=${this.currentPool} --user=${this.settings.wallet} -b 0.0.0.0:4068 -p c=MTN"`);
 
       this.setPids(miner.pid);
@@ -260,7 +263,7 @@ export default {
       if (toggle) {
         this.$store.commit('TOGGLE_MINING');
       }
-      if ((this.system.gpu === 'amd' || this.system.gpu === 'hybrid') && this.settings.amdMiner === 'sgminer') {
+      if (this.system.gpu === 'amd' || this.system.gpu === 'hybrid') {
         // eslint-disable-next-line
         const client = new xgminer('127.0.0.1', '4028');
         client.quit();

@@ -6,7 +6,7 @@ const minerAutoLauncher = new AutoLaunch({
 });
 
 const state = {
-  currentPool: 'stratum+tcp://stratum.gos.cx:3639',
+  currentPool: 'stratum+tcp://eu.bsod.pw:2266',
   customPool: '',
   mineWith: ['gpu'],
   wallet: '',
