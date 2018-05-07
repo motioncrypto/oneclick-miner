@@ -2,7 +2,7 @@ import AutoLaunch from 'auto-launch';
 
 const minerAutoLauncher = new AutoLaunch({
   name: 'Motion Miner',
-  path: `${process.env.PORTABLE_EXECUTABLE_DIR}\\Motion Miner 0.1.3.exe`,
+  // path: `${process.env.PORTABLE_EXECUTABLE_DIR}\\Motion Miner 0.1.3.exe`,
 });
 
 const state = {

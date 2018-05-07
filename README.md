@@ -1,6 +1,8 @@
-# motion-miner
+# Motion Miner
 
 > Motion miner with just one click - Nvidia and AMD over Windows.
+
+![Motion Miner](https://i.imgur.com/nsWzP08.png "Motion Miner")
 
 #### NVIDIA ADVISE
 
@@ -16,7 +18,7 @@
 
 **I do not have a Motion Address**
 
-Please download and install our wallet from [https://motionproject.org](Motion website), then generate a new Motion Address.
+Please download and install our wallet from [Motion website](https://motionproject.org), then generate a new Motion Address.
 
 **AMD Graphics is cycling and never start to mine**
 
