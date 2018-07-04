@@ -10,7 +10,7 @@
       </div>
       <Numbers v-if="!settings.advancedMode"></Numbers>
       <Console v-if="settings.advancedMode"></Console>
-      <!-- <Pool></Pool> -->
+      <Pool></Pool>
       <div class="field is-grouped start-mining">
         <div class="control">
           <button class="button is-medium is-primary" @click="startMine()" v-if="!system.mining">Start mining</button>
@@ -189,9 +189,6 @@ export default {
       const miner = exec(`start cmd.exe /K "${path.join(__static, minerPath)}/nvidia/${this.settings.nvidiaMiner}/miner \
         --algo=x16r --url=${this.currentPool} --user=${this.settings.wallet} -b 0.0.0.0:4068 -p c=MTN"`);
 
-      console.log(`start cmd.exe /K "${path.join(__static, minerPath)}/nvidia/${this.settings.nvidiaMiner}/miner \
-        --algo=x16r --url=${this.currentPool} --user=${this.settings.wallet} -b 0.0.0.0:4068 -p c=MTN"`);
-
       this.setPids(miner.pid);
 
       this.nvidiaInfo = setInterval(() => {
@@ -310,7 +307,7 @@ export default {
   }
 
   .wallet-address {
-    margin-top: 50px;
+    margin-top: 35px;
   }
 
   .donations {

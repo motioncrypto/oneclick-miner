@@ -4,15 +4,15 @@
       <div class="columns is-mobile has-text-centered">
         <div class="column is-4">
           <h2>Unpaid</h2>
-          <div><span class="tag is-primary is-normal">{{earned.unpaid}} DSR</span></div>
+          <div><span class="tag is-primary is-normal">{{earned.unpaid}} XMN</span></div>
         </div>
         <div class="column is-4">
           <h2>Paid last 24 hrs</h2>
-          <div><span class="tag is-primary is-normal">{{earned.lastday}} DSR</span></div>
+          <div><span class="tag is-primary is-normal">{{earned.lastday}} XMN</span></div>
         </div>
         <div class="column is-4">
           <h2>All time</h2>
-          <div><span class="tag is-primary is-normal">{{earned.allTime}} DSR</span></div>
+          <div><span class="tag is-primary is-normal">{{earned.allTime}} XMN</span></div>
         </div>
       </div>
     </div>
