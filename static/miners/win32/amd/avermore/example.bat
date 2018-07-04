@@ -15,7 +15,6 @@ pause
 ::   Note that higher intensities can sometimes lower your hashrate, since it creates more
 ::   work units at once; after a certain point, the work units take longer to return and
 ::   this will actually decrease your hashrate.
-:: - If you have an integrated GPU, you might have to set the OpenCL platform correctly
-::   using --gpu-platform. --gpu-platform=1 usually works here if the default isn't working.
-
+:: Troubleshooting: https://github.com/brian112358/avermore-miner/wiki/Getting-Started
+:: Optimizing hashrate: https://github.com/brian112358/avermore-miner/wiki/Optimizing-Hashrate
 
