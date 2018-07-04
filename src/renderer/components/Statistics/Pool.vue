@@ -1,5 +1,5 @@
 <template>
-  <section id="minerInfo">
+  <section id="minerInfo" v-if="earned && earned.unpaid">
     <div class="container">
       <div class="columns is-mobile has-text-centered">
         <div class="column is-4">
@@ -8,11 +8,11 @@
         </div>
         <div class="column is-4">
           <h2>Paid last 24 hrs</h2>
-          <div><span class="tag is-primary is-normal">{{earned.lastday}} XMN</span></div>
+          <div><span class="tag is-primary is-normal">{{earned.paid24h}} XMN</span></div>
         </div>
         <div class="column is-4">
           <h2>All time</h2>
-          <div><span class="tag is-primary is-normal">{{earned.allTime}} XMN</span></div>
+          <div><span class="tag is-primary is-normal">{{earned.total}} XMN</span></div>
         </div>
       </div>
     </div>
@@ -20,39 +20,28 @@
 </template>
 
 <script>
-import axios from 'axios';
 import { mapState } from 'vuex';
 
 export default {
-  data() {
-    return {
-      earned: {
-        unpaid: 0,
-        lastday: 0,
-        allTime: 0,
-      },
-    };
-  },
   computed: {
     ...mapState({
       settings: state => state.Settings,
+      earned: state => state.Pool,
     }),
   },
   methods: {
     fetchPoolData() {
-      axios.get(`http://blockeater.shardkeeper.com/api/wallet?address=${this.settings.wallet}`)
-        .then((response) => {
-          // eslint-disable-next-line
-          console.log(response);
-        })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.log(error);
-        });
+      this.$store.dispatch('fetchPoolData');
     },
   },
   created() {
-    this.fetchPoolData();
+    setInterval(() => {
+      if (this.$store.state.Settings.apiBase) {
+        this.fetchPoolData();
+      } else {
+        this.$store.commit('RESET_POOL_DATA');
+      }
+    }, 10000);
   },
 };
 </script>

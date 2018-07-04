@@ -7,10 +7,10 @@
           <b-select 
           v-model="poolSelected"
           placeholder="Select a pool"
-          @input="poolChanged = true">
+          @input="poolChanged = true;">
             <option
               v-for="pool in pools"
-              :value="pool.url"
+              :value="pool"
               :key="pool.url">
               {{ pool.name }}
             </option>
@@ -102,6 +102,8 @@ export default {
       customPool: '',
       poolSelected: null,
       poolSelectedByUser: false,
+      poolFee: 0,
+      apiBase: '',
       poolChanged: false,
       mineWith: ['gpu'],
       advancedMode: false,
@@ -115,9 +117,12 @@ export default {
   methods: {
     save() {
       this.$store.commit('CHANGE_CURRENT_POOL', {
-        pool: this.poolSelected,
+        poolSelected: this.poolSelected,
+        pool: this.poolSelected.url,
         customPool: this.customPool,
         poolSelectedByUser: this.poolChanged,
+        poolFee: this.poolSelected.fees,
+        apiBase: this.poolSelected.apiUrl,
       });
       this.$store.commit('CHANGE_MINE_WITH', {
         mineWith: this.mineWith,
@@ -144,9 +149,12 @@ export default {
     },
     defaults() {
       this.$store.commit('RESET_TO_DEFAULTS');
-      this.poolSelected = this.$store.state.Settings.currentPool;
+      this.poolSelected = this.$store.state.Settings.poolSelected;
+      this.pool = this.$store.state.Settings.currentPool;
       this.customPool = this.$store.state.Settings.customPool;
       this.poolSelectedByUser = this.$store.state.Settings.poolSelectedByUser;
+      this.poolFee = this.$store.state.Settings.poolFee;
+      this.apiBase = this.$store.state.Settings.apiBase;
       this.mineWith = this.$store.state.Settings.mineWith;
       this.advancedMode = this.$store.state.Settings.advancedMode;
       this.nvidiaMiner = this.$store.state.Settings.nvidiaMiner;
@@ -173,12 +181,19 @@ export default {
           pools.forEach((pool) => {
             this.pools.push(pool.data());
 
+            if (pool.data().url === this.$store.state.Settings.currentPool) {
+              this.poolSelected = pool.data();
+            }
+
             if (pool.data().default && !this.poolSelectedByUser) {
-              this.poolSelected = pool.data().url;
+              console.log('entre');
+              this.poolSelected = pool.data();
               this.$store.commit('CHANGE_CURRENT_POOL', {
                 pool: this.poolSelected,
                 customPool: this.customPool,
                 poolSelectedByUser: false,
+                poolFee: this.poolFee,
+                apiBase: this.apiBase,
               });
             }
           });
@@ -187,9 +202,12 @@ export default {
   },
   created() {
     this.getPools();
-    this.poolSelected = this.$store.state.Settings.currentPool;
+    this.poolSelected = this.$store.state.Settings.poolSelected;
+    this.pool = this.$store.state.Settings.currentPool;
     this.customPool = this.$store.state.Settings.customPool;
     this.poolSelectedByUser = this.$store.state.Settings.poolSelectedByUser;
+    this.poolFee = this.$store.state.Settings.poolFee;
+    this.apiBase = this.$store.state.Settings.apiBase;
     this.mineWith = this.$store.state.Settings.mineWith;
     this.advancedMode = this.$store.state.Settings.advancedMode;
     this.nvidiaMiner = this.$store.state.Settings.nvidiaMiner;

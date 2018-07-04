@@ -8,7 +8,7 @@ const minerAutoLauncher = new AutoLaunch({
 const state = {
   currentPool: 'stratum+tcp://eu.bsod.pw:2266',
   customPool: '',
-  poolFee: '',
+  poolFee: 0,
   apiBase: '',
   poolSelectedByUser: false,
   mineWith: ['gpu'],
@@ -27,6 +27,8 @@ const mutations = {
     state.currentPool = payload.pool;
     state.customPool = payload.customPool;
     state.poolSelectedByUser = payload.poolSelectedByUser;
+    state.poolFee = payload.poolFee ? payload.poolFee : 0;
+    state.apiBase = payload.apiBase ? payload.apiBase : '';
   },
   CHANGE_MINE_WITH(state, payload) {
     state.mineWith = payload.mineWith;
