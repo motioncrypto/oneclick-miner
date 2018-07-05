@@ -1,5 +1,8 @@
 <template>
   <div id="wrapper">
+    <div class="current-price">
+      <p>XMN/BTC: {{miner.currentPrice || 0}}BTC | XMN/USD: ${{(miner.currentPrice * miner.currentBtcPrice).toFixed(2) || 0}}</p>
+    </div>
     <img id="logo" src="~@/assets/logo.png" alt="motion-coin">
     <main>
       <h1>Lite Miner</h1>
@@ -13,8 +16,9 @@
       <Pool></Pool>
       <div class="field is-grouped start-mining">
         <div class="control">
-          <button class="button is-medium is-primary" @click="startMine()" v-if="!system.mining">Start mining</button>
-          <button class="button is-medium is-primary" @click="stopMine()" v-if="system.mining">Stop mining</button>
+          <button class="button is-medium is-primary" @click="startMine()" v-if="!system.mining && !status">Start mining</button>
+          <button class="button is-medium is-primary" @click="stopMine()" v-if="system.mining && !status">Stop mining</button>
+          <button class="button is-medium is-primary" disabled v-if="status">{{status}}</button>
         </div>
       </div>
       <div class="donations">
@@ -36,6 +40,7 @@ import 'hazardous';
 import { exec } from 'child_process';
 import { mapState, mapGetters } from 'vuex';
 import { clearInterval } from 'timers';
+import ps from 'ps-node';
 import net from 'net';
 import xgminer from 'xgminer';
 import path from 'path';
@@ -53,6 +58,7 @@ export default {
       nvidiaInfo: null,
       nvidiaCount: 0,
       amdCount: 0,
+      status: null,
     };
   },
   components: {
@@ -64,6 +70,7 @@ export default {
     ...mapState({
       settings: state => state.Settings,
       system: state => state.System,
+      miner: state => state.Miner,
     }),
     ...mapGetters({
       currentPool: 'getCurrentPool',
@@ -142,14 +149,15 @@ export default {
       set GPU_MAX_HEAP_SIZE=100 && \
       set GPU_SINGLE_ALLOC_PERCENT=100 && \
       ${path.join(__static, minerPath)}/amd/${this.settings.amdMiner}/miner \
-      --algorithm x16r \
+      -k x16r \
       --api-listen \
       --api-allow W:127.0.0.1 \
       --api-port=4028 \
       -o ${this.currentPool} \
       -u ${this.settings.wallet} \
-      -p c=MTN \
+      -p c=XMN \
       -X 256 \
+      ${this.settings.amdMiner === 'sgminer' ? '--gpu-platform=1 -g 2' : ''} \
       --kernel-path=""${path.join(__static, minerPath)}/amd/${this.settings.amdMiner}/kernel""`);
 
       this.amdInfo = setInterval(() => {
@@ -187,7 +195,7 @@ export default {
     },
     runNvidia(minerPath) {
       const miner = exec(`start cmd.exe /K "${path.join(__static, minerPath)}/nvidia/${this.settings.nvidiaMiner}/miner \
-        --algo=x16r --url=${this.currentPool} --user=${this.settings.wallet} -b 0.0.0.0:4068 -p c=MTN"`);
+        --algo=x16r --url=${this.currentPool} --user=${this.settings.wallet} -b 0.0.0.0:4068 -p c=XMN"`);
 
       this.setPids(miner.pid);
 
@@ -256,6 +264,7 @@ export default {
       }
     },
     stopMine(toggle = true) {
+      console.log('stopMine');
       this.$store.commit('RESET_MINER_STATUS');
       if (toggle) {
         this.$store.commit('TOGGLE_MINING');
@@ -265,23 +274,46 @@ export default {
         const client = new xgminer('127.0.0.1', '4028');
         client.quit();
       }
-      this.system.pids.forEach((pid) => {
-        // if (this.platform === 'win32') {
-        //   pid += pid;
-        // }
-        try {
-          if (this.platform === 'win32') {
-            process.kill(pid, 'SIGINT');
-          } else {
-            process.kill(pid, 'SIGHUP');
-          }
-        } catch (e) {
-          // eslint-disable-next-line
-          console.log(e);
+
+      this.status = 'Stopping...';
+      ps.lookup({
+        command: 'miner',
+        arguments: 'c=XMN',
+      }, (err, resultList) => {
+        if (err) {
+          throw new Error(err);
+        } else {
+          resultList.forEach((proc) => {
+            try {
+              if (this.platform === 'win32') {
+                process.kill(proc.pid, 'SIGINT');
+              } else {
+                process.kill(proc.pid, 'SIGHUP');
+              }
+            } catch (e) {
+              // eslint-disable-next-line
+              console.log(e);
+            }
+          });
+
+          this.system.pids.forEach((pid) => {
+            try {
+              if (this.platform === 'win32') {
+                process.kill(pid, 'SIGINT');
+              } else {
+                process.kill(pid, 'SIGHUP');
+              }
+            } catch (e) {
+              // eslint-disable-next-line
+              console.log(e);
+            }
+            this.$store.commit('REMOVE_PID', {
+              pid,
+            });
+          });
+
+          this.status = null;
         }
-        this.$store.commit('REMOVE_PID', {
-          pid,
-        });
       });
     },
   },
@@ -314,6 +346,13 @@ export default {
     position: absolute;
     bottom: 20px;
     left: 20px;
+    font-size: 0.8em;
+  }
+
+  .current-price {
+    position: absolute;
+    top: 20px;
+    right: 20px;
     font-size: 0.8em;
   }
 
