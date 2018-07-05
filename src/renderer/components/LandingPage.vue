@@ -1,5 +1,8 @@
 <template>
   <div id="wrapper">
+    <div class="current-price">
+      <p>XMN/BTC: {{miner.currentPrice || 0}}BTC | XMN/USD: ${{(miner.currentPrice * miner.currentBtcPrice).toFixed(2) || 0}}</p>
+    </div>
     <img id="logo" src="~@/assets/logo.png" alt="motion-coin">
     <main>
       <h1>Lite Miner</h1>
@@ -67,6 +70,7 @@ export default {
     ...mapState({
       settings: state => state.Settings,
       system: state => state.System,
+      miner: state => state.Miner,
     }),
     ...mapGetters({
       currentPool: 'getCurrentPool',
@@ -342,6 +346,13 @@ export default {
     position: absolute;
     bottom: 20px;
     left: 20px;
+    font-size: 0.8em;
+  }
+
+  .current-price {
+    position: absolute;
+    top: 20px;
+    right: 20px;
     font-size: 0.8em;
   }
 

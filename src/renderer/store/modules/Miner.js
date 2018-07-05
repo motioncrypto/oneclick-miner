@@ -13,6 +13,8 @@ const state = {
   console: [],
   profit: 0,
   rewards: 0,
+  currentPrice: 0,
+  currentBtcPrice: 0,
 };
 
 const mutations = {
@@ -48,17 +50,33 @@ const mutations = {
   UPDATE_PROFITS(state, payload) {
     state.profit = payload.profit;
     state.rewards = payload.rewards;
+    state.currentPrice = payload.currentPrice;
+  },
+  UPDATE_BTC_PRICE(state, payload) {
+    state.currentBtcPrice = payload.currentBtcPrice;
   },
 };
 
 const actions = {
-  fetchProfitData({ commit, rootState }) {
-    axios.get(`https://whattomine.com/coins/248-xmn-x16r.json?utf8=%E2%9C%93&hr=${(rootState.Miner.gpuSpeed.nvidia + rootState.Miner.gpuSpeed.amd) / 1000}&p=0&fee=2&cost=0&hcost=0.0&commit=Calculate`)
+  fetchProfitData({ commit, state }) {
+    axios.get(`https://whattomine.com/coins/248-xmn-x16r.json?utf8=%E2%9C%93&hr=${(state.gpuSpeed.nvidia + state.gpuSpeed.amd) / 1000}&p=0&fee=2&cost=0&hcost=0.0&commit=Calculate`)
       .then((response) => {
-        console.log(response.data);
         commit('UPDATE_PROFITS', {
           rewards: response.data.estimated_rewards,
           profit: response.data.profit,
+          currentPrice: response.data.exchange_rate,
+        });
+      })
+      .catch((error) => {
+        // eslint-disable-next-line
+        console.log(error);
+      });
+  },
+  fetchCurrentBtcPrice({ commit }) {
+    axios.get('https://api.livecoin.net/exchange/ticker?currencyPair=BTC/USD')
+      .then((response) => {
+        commit('UPDATE_BTC_PRICE', {
+          currentBtcPrice: response.data.last,
         });
       })
       .catch((error) => {
