@@ -93,8 +93,6 @@ ulong FAST_ROTL64_HI(const uint2 x, const uint y) { return(as_ulong(amd_bitalign
 ulong ROTL64_1(const uint2 vv, const int r) { return as_ulong(amd_bitalign((vv).xy, (vv).yx, 32 - r)); }
 ulong ROTL64_2(const uint2 vv, const int r) { return as_ulong((amd_bitalign((vv).yx, (vv).xy, 64 - r))); }
 
-#define SWAP8(x) as_ulong(as_uchar8(x).s76543210)
-
 #define VSWAP8(x)	(((x) >> 56) | (((x) >> 40) & 0x000000000000FF00UL) | (((x) >> 24) & 0x0000000000FF0000UL) \
           | (((x) >>  8) & 0x00000000FF000000UL) | (((x) <<  8) & 0x000000FF00000000UL) \
           | (((x) << 24) & 0x0000FF0000000000UL) | (((x) << 40) & 0x00FF000000000000UL) | (((x) << 56) & 0xFF00000000000000UL))
@@ -102,7 +100,7 @@ ulong ROTL64_2(const uint2 vv, const int r) { return as_ulong((amd_bitalign((vv)
 #define WOLF_JH_64BIT 1
 
 #include "wolf-aes.cl"
-#include "wolf-blake.cl"
+#include "blake.cl"
 #include "wolf-bmw.cl"
 #include "pallas-groestl.cl"
 #include "wolf-jh.cl"
@@ -150,46 +148,66 @@ typedef union {
 __attribute__((reqd_work_group_size(WORKSIZE, 1, 1)))
 __kernel void search(__global unsigned char* block, __global hash_t* hashes)
 {
-    ulong16 V;
-	ulong M[16] = {0UL};
-	
-	uint gid = get_global_id(0);
-    uint offset = get_global_offset(0);
-    __global hash_t *hash = &(hashes[gid-offset]);
-	
-	#pragma unroll
-    for(int i = 0; i < 10; i++)
-       M[i] = DEC64BE(block + i * 8);
+    uint gid = get_global_id(0);
+    __global hash_t *hash = &(hashes[gid-get_global_offset(0)]);
 
-    M[9] &= 0xFFFFFFFF00000000;
-    M[9] ^= SWAP4(gid);
-    M[10] = 0x8000000000000000UL;
-	M[13] = 1UL;
-	M[15] = 0x280UL;
-	
-	V.lo = vload8(0, BLAKE512_IV);
-	V.hi = vload8(0, blake_cb);
-	
-	V.scd ^= (ulong2)(0x280UL, 0x280UL);
-	
-	for(bool flag = false; ; flag = true)
-	{
-		BLAKE_RND(0);
-		BLAKE_RND(1);
-		BLAKE_RND(2);
-		BLAKE_RND(3);
-		BLAKE_RND(4);
-		BLAKE_RND(5);
-		if(flag) break;
-		BLAKE_RND(6);
-		BLAKE_RND(7);
-		BLAKE_RND(8);
-		BLAKE_RND(9);
-	}
-	
-	vstore8(VSWAP8(((__constant ulong8 *)BLAKE512_IV)[0] ^ V.lo ^ V.hi), 0, hash->h8);
-	
-	barrier(CLK_GLOBAL_MEM_FENCE);
+  // blake
+
+  sph_u64 V0 = BLAKE_IV512[0], V1 = BLAKE_IV512[1], V2 = BLAKE_IV512[2], V3 = BLAKE_IV512[3];
+  sph_u64 V4 = BLAKE_IV512[4], V5 = BLAKE_IV512[5], V6 = BLAKE_IV512[6], V7 = BLAKE_IV512[7];
+  sph_u64 V8 = CB0, V9 = CB1, VA = CB2, VB = CB3;
+  sph_u64 VC = 0x452821E638D011F7UL, VD = 0xBE5466CF34E90EECUL, VE = CB6, VF = CB7;
+
+  sph_u64 M0, M1, M2, M3, M4, M5, M6, M7;
+  sph_u64 M8, M9, MA, MB, MC, MD, ME, MF;
+
+  M0 = DEC64BE(block + 0);
+  M1 = DEC64BE(block + 8);
+  M2 = DEC64BE(block + 16);
+  M3 = DEC64BE(block + 24);
+  M4 = DEC64BE(block + 32);
+  M5 = DEC64BE(block + 40);
+  M6 = DEC64BE(block + 48);
+  M7 = DEC64BE(block + 56);
+  M8 = DEC64BE(block + 64);
+  M9 = DEC64BE(block + 72);
+  M9 &= 0xFFFFFFFF00000000;
+  M9 ^= SWAP4(gid);
+  MA = 0x8000000000000000;
+  MB = 0;
+  MC = 0;
+  MD = 1;
+  ME = 0;
+  MF = 0x280;
+
+  bool flag = false;
+	rnds:
+	ROUND_B(0);
+	ROUND_B(1);
+	ROUND_B(2);
+	ROUND_B(3);
+	ROUND_B(4);
+	ROUND_B(5);
+	if(flag) goto end;
+	ROUND_B(6);
+	ROUND_B(7);
+	ROUND_B(8);
+	ROUND_B(9);
+	flag = true;
+	goto rnds;
+
+	end:
+
+  hash->h8[0] = SWAP8(V0 ^ V8 ^ BLAKE_IV512[0]);
+  hash->h8[1] = SWAP8(V1 ^ V9 ^ BLAKE_IV512[1]);
+  hash->h8[2] = SWAP8(V2 ^ VA ^ BLAKE_IV512[2]);
+  hash->h8[3] = SWAP8(V3 ^ VB ^ BLAKE_IV512[3]);
+  hash->h8[4] = SWAP8(V4 ^ VC ^ BLAKE_IV512[4]);
+  hash->h8[5] = SWAP8(V5 ^ VD ^ BLAKE_IV512[5]);
+  hash->h8[6] = SWAP8(V6 ^ VE ^ BLAKE_IV512[6]);
+  hash->h8[7] = SWAP8(V7 ^ VF ^ BLAKE_IV512[7]);
+
+  barrier(CLK_GLOBAL_MEM_FENCE);
 }
 
 __attribute__((reqd_work_group_size(WORKSIZE, 1, 1)))
@@ -1070,21 +1088,37 @@ __kernel void search10(__global hash_t* hashes)
 
   uint4 W[16];
 
-  #pragma unroll
-  for(int i = 0; i < 8; ++i) W[i] = (uint4)(512, 0, 0, 0);
+  // Precomp
+  W[0] = (uint4)(0xe7e9f5f5, 0xf5e7e9f5, 0xb3b36b23, 0xb3dbe7af);
+  W[1] = (uint4)(0x14b8a457, 0xf5e7e9f5, 0xb3b36b23, 0xb3dbe7af);
+  W[2] = (uint4)(0xdbfde1dd, 0xf5e7e9f5, 0xb3b36b23, 0xb3dbe7af);
+  W[3] = (uint4)(0x9ac2dea3, 0xf5e7e9f5, 0xb3b36b23, 0xb3dbe7af);
+  W[4] = (uint4)(0x65978b09, 0xf5e7e9f5, 0xb3b36b23, 0xb3dbe7af);
+  W[5] = (uint4)(0xa4213d7e, 0xf5e7e9f5, 0xb3b36b23, 0xb3dbe7af);
+  W[6] = (uint4)(0x265f4382, 0xf5e7e9f5, 0xb3b36b23, 0xb3dbe7af);
+  W[7] = (uint4)(0x34514d9e, 0xf5e7e9f5, 0xb3b36b23, 0xb3dbe7af);
+  W[12] = (uint4)(0xb134347e, 0xea6f7e7e, 0xbd7731bd, 0x8a8a1968);
+  W[13] = (uint4)(0x579f9f33, 0xfbfbfbfb, 0xfbfbfbfb, 0xefefd3c7);
+  W[14] = (uint4)(0x2cb6b661, 0x6b23b3b3, 0xcf93a7cf, 0x9d9d3751);
+  W[15] = (uint4)(0x01425eb8, 0xf5e7e9f5, 0xb3b36b23, 0xb3dbe7af);
 
   ((uint16 *)W)[2] = vload16(0, hash->h4);
 
-  W[12] = (uint4)(0x80, 0, 0, 0);
-  W[13] = (uint4)(0, 0, 0, 0);
-  W[14] = (uint4)(0, 0, 0, 0x02000000);
-  W[15] = (uint4)(512, 0, 0, 0);
-
   barrier(CLK_LOCAL_MEM_FENCE);
 
+  #pragma unroll
+	for(int x = 8; x < 12; ++x) {
+		uint4 tmp;
+		tmp = Echo_AES_Round_Small(AES0, W[x]);
+		tmp.s0 ^= x | 0x200;
+		W[x] = Echo_AES_Round_Small(AES0, tmp);
+	}
+  BigShiftRows(W);
+  BigMixColumns(W);
+
   #pragma unroll 1
-  for(uchar i = 0; i < 10; ++i) {
-      BigSubBytesSmall(AES0, W, i);
+  for(uint k0 = 16; k0 < 160; k0 += 16) {
+      BigSubBytesSmall(AES0, W, k0);
       BigShiftRows(W);
       BigMixColumns(W);
   }
@@ -1398,22 +1432,13 @@ __kernel void search14(__global hash_t* hashes)
 
   h0 = h1 = h2 = h3 = h4 = h5 = h6 = h7 = 0;
 
-  n0 ^= h0;
-  n1 ^= h1;
-  n2 ^= h2;
-  n3 ^= h3;
-  n4 ^= h4;
-  n5 ^= h5;
-  n6 ^= h6;
-  n7 ^= h7;
-
   #pragma unroll 10
   for (unsigned r = 0; r < 10; r ++) {
     sph_u64 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-    ROUND_KSCHED(plain_T, h, tmp, plain_RC[r]);
+    ROUND_KSCHED(LT, h, tmp, plain_RC[r]);
     TRANSFER(h, tmp);
-    ROUND_WENC(plain_T, n, h, tmp);
+    ROUND_WENC(LT, n, h, tmp);
     TRANSFER(n, tmp);
   }
 
@@ -1427,7 +1452,6 @@ __kernel void search14(__global hash_t* hashes)
   state[7] = n7 ^ (hash->h8[7]);
 
   n0 = 0x80;
-  n1 = n2 = n3 = n4 = n5 = n6 = 0;
   n7 = 0x2000000000000;
 
   h0 = state[0];
@@ -1440,12 +1464,12 @@ __kernel void search14(__global hash_t* hashes)
   h7 = state[7];
 
   n0 ^= h0;
-  n1 ^= h1;
-  n2 ^= h2;
-  n3 ^= h3;
-  n4 ^= h4;
-  n5 ^= h5;
-  n6 ^= h6;
+  n1 = h1;
+  n2 = h2;
+  n3 = h3;
+  n4 = h4;
+  n5 = h5;
+  n6 = h6;
   n7 ^= h7;
 
   #pragma unroll 10
@@ -1454,7 +1478,7 @@ __kernel void search14(__global hash_t* hashes)
 
     ROUND_KSCHED(LT, h, tmp, plain_RC[r]);
     TRANSFER(h, tmp);
-    ROUND_WENC(plain_T, n, h, tmp);
+    ROUND_WENC(LT, n, h, tmp);
     TRANSFER(n, tmp);
   }
 

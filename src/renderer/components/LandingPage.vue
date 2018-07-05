@@ -153,6 +153,7 @@ export default {
       -u ${this.settings.wallet} \
       -p c=XMN \
       -X 256 \
+      ${this.settings.amdMiner === 'sgminer' ? '--gpu-platform=1 -g 2' : ''} \
       --kernel-path=""${path.join(__static, minerPath)}/amd/${this.settings.amdMiner}/kernel""`);
 
       this.amdInfo = setInterval(() => {

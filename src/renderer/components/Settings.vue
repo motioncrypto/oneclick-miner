@@ -12,7 +12,7 @@
               v-for="pool in pools"
               :value="pool"
               :key="pool.url">
-              {{ pool.name }}
+              {{pool.name}} (Fee: {{pool.fees}}%)
             </option>
             <option value="custom">Custom pool...</option>
           </b-select>
@@ -20,7 +20,7 @@
       </div>
       <div class="field-container" v-if="poolSelected === 'custom'">
         <b-field label="Please enter the full Stratum URL Server with port">
-          <b-input v-model="customPool" placeholder="stratum+tcp://eu.cryptoally.net:4233"></b-input>
+          <b-input v-model="customPool" placeholder="stratum+tcp://eu.bsod.pw:2266"></b-input>
         </b-field>
       </div>
       <div class="field-container">
@@ -29,7 +29,7 @@
           <div class="field">
             <b-radio v-model="nvidiaMiner"
               native-value="enemy">
-              Z-Enemy
+              Z-Enemy - 1% Fee
             </b-radio>
           </div>
           <div class="field">
@@ -44,13 +44,13 @@
           <div class="field">
             <b-radio v-model="amdMiner"
               native-value="avermore">
-              Avermore
+              Avermore - 1% Fee
             </b-radio>
           </div>
           <div class="field">
             <b-radio v-model="amdMiner"
               native-value="sgminer">
-              SGMiner-kl
+              SGMiner-kl - 1% Fee
             </b-radio>
           </div>
         </div>
