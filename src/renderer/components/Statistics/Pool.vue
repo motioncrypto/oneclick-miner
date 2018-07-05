@@ -1,18 +1,18 @@
 <template>
-  <section id="minerInfo" v-if="earned && earned.unpaid">
+  <section id="minerInfo" v-if="earned && settings.apiBase">
     <div class="container">
       <div class="columns is-mobile has-text-centered">
         <div class="column is-4">
           <h2>Unpaid</h2>
-          <div><span class="tag is-primary is-normal">{{earned.unpaid}} XMN</span></div>
+          <div><span class="tag is-primary is-normal">{{earned.unpaid || 0}} XMN</span></div>
         </div>
         <div class="column is-4">
           <h2>Paid last 24 hrs</h2>
-          <div><span class="tag is-primary is-normal">{{earned.paid24h}} XMN</span></div>
+          <div><span class="tag is-primary is-normal">{{earned.paid24h || 0}} XMN</span></div>
         </div>
         <div class="column is-4">
           <h2>All time</h2>
-          <div><span class="tag is-primary is-normal">{{earned.total}} XMN</span></div>
+          <div><span class="tag is-primary is-normal">{{earned.total || 0}} XMN</span></div>
         </div>
       </div>
     </div>
@@ -46,8 +46,12 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   #minerInfo {
     margin-top: 30px;
+  }
+
+  h2 {
+    font-size: 0.8em;
   }
 </style>

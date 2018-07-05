@@ -13,8 +13,9 @@
       <Pool></Pool>
       <div class="field is-grouped start-mining">
         <div class="control">
-          <button class="button is-medium is-primary" @click="startMine()" v-if="!system.mining">Start mining</button>
-          <button class="button is-medium is-primary" @click="stopMine()" v-if="system.mining">Stop mining</button>
+          <button class="button is-medium is-primary" @click="startMine()" v-if="!system.mining && !status">Start mining</button>
+          <button class="button is-medium is-primary" @click="stopMine()" v-if="system.mining && !status">Stop mining</button>
+          <button class="button is-medium is-primary" disabled v-if="status">{{status}}</button>
         </div>
       </div>
       <div class="donations">
@@ -36,6 +37,7 @@ import 'hazardous';
 import { exec } from 'child_process';
 import { mapState, mapGetters } from 'vuex';
 import { clearInterval } from 'timers';
+import ps from 'ps-node';
 import net from 'net';
 import xgminer from 'xgminer';
 import path from 'path';
@@ -53,6 +55,7 @@ export default {
       nvidiaInfo: null,
       nvidiaCount: 0,
       amdCount: 0,
+      status: null,
     };
   },
   components: {
@@ -256,6 +259,7 @@ export default {
       }
     },
     stopMine(toggle = true) {
+      console.log('stopMine');
       this.$store.commit('RESET_MINER_STATUS');
       if (toggle) {
         this.$store.commit('TOGGLE_MINING');
@@ -265,23 +269,46 @@ export default {
         const client = new xgminer('127.0.0.1', '4028');
         client.quit();
       }
-      this.system.pids.forEach((pid) => {
-        // if (this.platform === 'win32') {
-        //   pid += pid;
-        // }
-        try {
-          if (this.platform === 'win32') {
-            process.kill(pid, 'SIGINT');
-          } else {
-            process.kill(pid, 'SIGHUP');
-          }
-        } catch (e) {
-          // eslint-disable-next-line
-          console.log(e);
+
+      this.status = 'Stopping...';
+      ps.lookup({
+        command: 'miner',
+        arguments: 'c=XMN',
+      }, (err, resultList) => {
+        if (err) {
+          throw new Error(err);
+        } else {
+          resultList.forEach((proc) => {
+            try {
+              if (this.platform === 'win32') {
+                process.kill(proc.pid, 'SIGINT');
+              } else {
+                process.kill(proc.pid, 'SIGHUP');
+              }
+            } catch (e) {
+              // eslint-disable-next-line
+              console.log(e);
+            }
+          });
+
+          this.system.pids.forEach((pid) => {
+            try {
+              if (this.platform === 'win32') {
+                process.kill(pid, 'SIGINT');
+              } else {
+                process.kill(pid, 'SIGHUP');
+              }
+            } catch (e) {
+              // eslint-disable-next-line
+              console.log(e);
+            }
+            this.$store.commit('REMOVE_PID', {
+              pid,
+            });
+          });
+
+          this.status = null;
         }
-        this.$store.commit('REMOVE_PID', {
-          pid,
-        });
       });
     },
   },

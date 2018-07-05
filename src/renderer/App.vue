@@ -7,7 +7,7 @@
 <script>
   export default {
     name: 'motion-miner',
-    created() {
+    mounted() {
       this.$store.commit('RESTART_SYSTEM');
       this.$store.commit('RESET_MINER_STATUS');
       this.$store.commit('RESET_POOL_DATA');

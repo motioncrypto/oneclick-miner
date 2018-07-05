@@ -66,6 +66,7 @@
     "cgminer-api": "^1.0.0-beta6",
     "chart.js": "^2.7.1",
     "hazardous": "^0.3.0",
+    "ps-node": "^0.1.6",
     "vue": "^2.5.13",
     "vue-electron": "^1.0.6",
     "vue-router": "^2.5.3",

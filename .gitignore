@@ -10,3 +10,4 @@ thumbs.db
 *_log.txt
 !.gitkeep
 *.bin
+yarn-error.log
