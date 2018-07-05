@@ -1,8 +1,8 @@
 {
   "name": "motion-miner",
-  "version": "0.1.3",
+  "version": "2.0.0",
   "author": "Omar Cruz <ocruzvar@gmail.com>",
-  "description": "Motion miner",
+  "description": "Motion miner (XMN)",
   "license": "MIT",
   "main": "./dist/electron/main.js",
   "scripts": {
