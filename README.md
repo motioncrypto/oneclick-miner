@@ -2,7 +2,7 @@
 
 > Motion miner with just one click - Nvidia and AMD over Windows.
 
-![Motion Miner](https://i.imgur.com/nsWzP08.png "Motion Miner")
+![Motion Miner](https://i.imgur.com/A0Bzx08.png "Motion Miner")
 
 #### NVIDIA ADVISE
 
