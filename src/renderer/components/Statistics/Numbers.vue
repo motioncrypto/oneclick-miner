@@ -35,7 +35,7 @@ export default {
       if (this.system.mining) {
         this.$store.dispatch('fetchProfitData');
       }
-    }, 10000);
+    }, 120000);
   },
 };
 </script>

@@ -1,4 +1,4 @@
-# Motion Miner
+# Motion Miner v2.0.0
 
 > Motion miner with just one click - Nvidia and AMD over Windows.
 
@@ -12,7 +12,7 @@
 
 - [X] Custom pools
 - [X] AMD Graphics support (beta)
-- [ ] Integration with Pools API
+- [X] Integration with Pools API
 
 #### Troubleshootings
 
