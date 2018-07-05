@@ -33,7 +33,7 @@ const actions = {
         commit('SET_POOL_DATA', response.data);
       })
       .catch((error) => {
-        // eslint-disable-next-lin  e
+        // eslint-disable-next-line
         console.log(error);
       });
   },

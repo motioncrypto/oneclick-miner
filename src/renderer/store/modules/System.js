@@ -1,3 +1,5 @@
+import { ipcRenderer } from 'electron';
+
 const state = {
   mining: false,
   pids: [],
@@ -8,6 +10,8 @@ const mutations = {
   ADD_PID(state, payload) {
     if (state.pids.indexOf(payload.pid === -1)) {
       state.pids.push(Number(payload.pid));
+
+      ipcRenderer.send('addPid', Number(payload.pid));
     }
   },
   REMOVE_PID(state, payload) {
@@ -15,6 +19,8 @@ const mutations = {
     if (state.pids.indexOf(payload.pid) !== -1) {
       state.pids.splice(state.pids.indexOf(payload.pid), 1);
     }
+
+    ipcRenderer.send('removePid', Number(payload.pid));
   },
   CHANGE_GPU(state, payload) {
     state.gpu = payload.gpu;
