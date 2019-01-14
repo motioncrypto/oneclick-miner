@@ -65,6 +65,9 @@ extern "C"{
 
 #endif
 
+#define GOST_WORKSIZE (256)
+#define GOST_OUT(i) (out[get_local_id(0) + (GOST_WORKSIZE * (i))])
+
 //--------------------------------------------------------------------------------------------
 //
 //	stribog implementation
@@ -810,93 +813,78 @@ __constant const ulong CC[12][8] = {
   } while (0)
 
 #define GOST_F(state, sph_state, lT) do {\
-	r = 0;\
-	r ^= lT[0][state[56]];\
-	r ^= lT[1][state[48]];\
-	r ^= lT[2][state[40]];\
-	r ^= lT[3][state[32]];\
-	r ^= lT[4][state[24]];\
-	r ^= lT[5][state[16]];\
-	r ^= lT[6][state[8]];\
-	r ^= lT[7][state[0]];\
-	*return_state = r;\
-	r = 0;\
-        \
-	r ^= lT[0][state[57]];\
-	r ^= lT[1][state[49]];\
-	r ^= lT[2][state[41]];\
-	r ^= lT[3][state[33]];\
-	r ^= lT[4][state[25]];\
-	r ^= lT[5][state[17]];\
-	r ^= lT[6][state[9]];\
-	r ^= lT[7][state[1]];\
-	*(return_state+1) = r;\
-	r = 0;\
-        \
-	r ^= lT[0][state[58]];\
-	r ^= lT[1][state[50]];\
-	r ^= lT[2][state[42]];\
-	r ^= lT[3][state[34]];\
-	r ^= lT[4][state[26]];\
-	r ^= lT[5][state[18]];\
-	r ^= lT[6][state[10]];\
-	r ^= lT[7][state[2]];\
-	*(return_state+2) = r;\
-	r = 0;\
-        \
-	r ^= lT[0][state[59]];\
-	r ^= lT[1][state[51]];\
-	r ^= lT[2][state[43]];\
-	r ^= lT[3][state[35]];\
-	r ^= lT[4][state[27]];\
-	r ^= lT[5][state[19]];\
-	r ^= lT[6][state[11]];\
-	r ^= lT[7][state[3]];\
-	*(return_state+3) = r;\
-	r = 0;\
-        \
-	r ^= lT[0][state[60]];\
-	r ^= lT[1][state[52]];\
-	r ^= lT[2][state[44]];\
-	r ^= lT[3][state[36]];\
-	r ^= lT[4][state[28]];\
-	r ^= lT[5][state[20]];\
-	r ^= lT[6][state[12]];\
-	r ^= lT[7][state[4]];\
-	*(return_state+4) = r;\
-	r = 0;\
-        \
-	r ^= lT[0][state[61]];\
-	r ^= lT[1][state[53]];\
-	r ^= lT[2][state[45]];\
-	r ^= lT[3][state[37]];\
-	r ^= lT[4][state[29]];\
-	r ^= lT[5][state[21]];\
-	r ^= lT[6][state[13]];\
-	r ^= lT[7][state[5]];\
-	*(return_state+5) = r;\
-	r = 0;\
-        \
-	r ^= lT[0][state[62]];\
-	r ^= lT[1][state[54]];\
-	r ^= lT[2][state[46]];\
-	r ^= lT[3][state[38]];\
-	r ^= lT[4][state[30]];\
-	r ^= lT[5][state[22]];\
-	r ^= lT[6][state[14]];\
-	r ^= lT[7][state[6]];\
-	*(return_state+6) = r;\
-	r = 0;\
-        \
-	r ^= lT[0][state[63]];\
-	r ^= lT[1][state[55]];\
-	r ^= lT[2][state[47]];\
-	r ^= lT[3][state[39]];\
-	r ^= lT[4][state[31]];\
-	r ^= lT[5][state[23]];\
-	r ^= lT[6][state[15]];\
-	r ^= lT[7][state[7]];\
-	*(return_state+7) = r;\
+	*return_state = 0;\
+	*return_state ^= lT[0][state[56]];\
+	*return_state ^= lT[1][state[48]];\
+	*return_state ^= lT[2][state[40]];\
+	*return_state ^= lT[3][state[32]];\
+	*return_state ^= lT[4][state[24]];\
+	*return_state ^= lT[5][state[16]];\
+	*return_state ^= lT[6][state[8]];\
+	*return_state ^= lT[7][state[0]];\
+	*(return_state+1) = 0;\
+	*(return_state+1) ^= lT[0][state[57]];\
+	*(return_state+1) ^= lT[1][state[49]];\
+	*(return_state+1) ^= lT[2][state[41]];\
+	*(return_state+1) ^= lT[3][state[33]];\
+	*(return_state+1) ^= lT[4][state[25]];\
+	*(return_state+1) ^= lT[5][state[17]];\
+	*(return_state+1) ^= lT[6][state[9]];\
+	*(return_state+1) ^= lT[7][state[1]];\
+	*(return_state+2) = 0;\
+	*(return_state+2) ^= lT[0][state[58]];\
+	*(return_state+2) ^= lT[1][state[50]];\
+	*(return_state+2) ^= lT[2][state[42]];\
+	*(return_state+2) ^= lT[3][state[34]];\
+	*(return_state+2) ^= lT[4][state[26]];\
+	*(return_state+2) ^= lT[5][state[18]];\
+	*(return_state+2) ^= lT[6][state[10]];\
+	*(return_state+2) ^= lT[7][state[2]];\
+	*(return_state+3) = 0;\
+	*(return_state+3) ^= lT[0][state[59]];\
+	*(return_state+3) ^= lT[1][state[51]];\
+	*(return_state+3) ^= lT[2][state[43]];\
+	*(return_state+3) ^= lT[3][state[35]];\
+	*(return_state+3) ^= lT[4][state[27]];\
+	*(return_state+3) ^= lT[5][state[19]];\
+	*(return_state+3) ^= lT[6][state[11]];\
+	*(return_state+3) ^= lT[7][state[3]];\
+	*(return_state+4) = 0;\
+	*(return_state+4) ^= lT[0][state[60]];\
+	*(return_state+4) ^= lT[1][state[52]];\
+	*(return_state+4) ^= lT[2][state[44]];\
+	*(return_state+4) ^= lT[3][state[36]];\
+	*(return_state+4) ^= lT[4][state[28]];\
+	*(return_state+4) ^= lT[5][state[20]];\
+	*(return_state+4) ^= lT[6][state[12]];\
+	*(return_state+4) ^= lT[7][state[4]];\
+	*(return_state+5) = 0;\
+	*(return_state+5) ^= lT[0][state[61]];\
+	*(return_state+5) ^= lT[1][state[53]];\
+	*(return_state+5) ^= lT[2][state[45]];\
+	*(return_state+5) ^= lT[3][state[37]];\
+	*(return_state+5) ^= lT[4][state[29]];\
+	*(return_state+5) ^= lT[5][state[21]];\
+	*(return_state+5) ^= lT[6][state[13]];\
+	*(return_state+5) ^= lT[7][state[5]];\
+	*(return_state+6) = 0;\
+	*(return_state+6) ^= lT[0][state[62]];\
+	*(return_state+6) ^= lT[1][state[54]];\
+	*(return_state+6) ^= lT[2][state[46]];\
+	*(return_state+6) ^= lT[3][state[38]];\
+	*(return_state+6) ^= lT[4][state[30]];\
+	*(return_state+6) ^= lT[5][state[22]];\
+	*(return_state+6) ^= lT[6][state[14]];\
+	*(return_state+6) ^= lT[7][state[6]];\
+	*(return_state+7) = 0;\
+	*(return_state+7) ^= lT[0][state[63]];\
+	*(return_state+7) ^= lT[1][state[55]];\
+	*(return_state+7) ^= lT[2][state[47]];\
+	*(return_state+7) ^= lT[3][state[39]];\
+	*(return_state+7) ^= lT[4][state[31]];\
+	*(return_state+7) ^= lT[5][state[23]];\
+	*(return_state+7) ^= lT[6][state[15]];\
+	*(return_state+7) ^= lT[7][state[7]];\
         tmp = (sph_u64*)state;\
         state = (unsigned char*)return_state;\
         sph_state = (sph_u64*)state;\
@@ -960,12 +948,33 @@ __constant const ulong CC[12][8] = {
 } while(0)
 
 
-#define GOST_G_N(N,h,m) do {\
-        NN = (sph_u64*) N;\
-        hh = (sph_u64*) h;\
+#define GOST_XOR_I(A, out, C) do {\
+	C[0] = A[0] ^ GOST_OUT(0);\
+	C[1] = A[1] ^ GOST_OUT(1);\
+	C[2] = A[2] ^ GOST_OUT(2);\
+	C[3] = A[3] ^ GOST_OUT(3);\
+	C[4] = A[4] ^ GOST_OUT(4);\
+	C[5] = A[5] ^ GOST_OUT(5);\
+	C[6] = A[6] ^ GOST_OUT(6);\
+	C[7] = A[7] ^ GOST_OUT(7);\
+} while (0)
+
+#define GOST_XOR_O(A, B, out) do {\
+	GOST_OUT(0) = A[0] ^ B[0];\
+	GOST_OUT(1) = A[1] ^ B[1];\
+	GOST_OUT(2) = A[2] ^ B[2];\
+	GOST_OUT(3) = A[3] ^ B[3];\
+	GOST_OUT(4) = A[4] ^ B[4];\
+	GOST_OUT(5) = A[5] ^ B[5];\
+	GOST_OUT(6) = A[6] ^ B[6];\
+	GOST_OUT(7) = A[7] ^ B[7];\
+} while (0)
+
+#define GOST_G_N(N,out,m) do {\
+        NNN = (sph_u64*) N;\
         mm = (sph_u64*) m;\
         \
-        GOST_XOR(NN,hh,K);\
+        GOST_XOR_I(NNN,out,K);\
         \
         ucK = (unsigned char*)K;\
         \
@@ -973,8 +982,9 @@ __constant const ulong CC[12][8] = {
         \
 	GOST_E(K,mm,t);\
         \
-        GOST_XOR(t,hh,t);\
-        GOST_XOR(t,mm,hh);\
+        GOST_XOR_I(t,out,t);\
+        GOST_XOR_O(t,mm,out);\
+        barrier(CLK_LOCAL_MEM_FENCE); \
 } while(0)
 
 
@@ -984,12 +994,6 @@ __constant const ulong CC[12][8] = {
 			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
 			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
 			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x00\
-	};\
-	unsigned char v0[64] = {\
-			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
-			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
-			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
-			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\
 	};\
 	unsigned char Sigma[64] = {\
 			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
@@ -1003,49 +1007,41 @@ __constant const ulong CC[12][8] = {
 			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
 			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\
 	};\
-	unsigned char hash[64] = {\
-			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
-			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
-			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,\
-			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00\
-	};\
         \
-	unsigned char m[64];\
-        unsigned char *msg = (unsigned char*) message;\
-        unsigned char *outc = (unsigned char*) out;\
+        unsigned char *m = (unsigned char*) message;\
+        _Pragma("unroll") for (int i = 0; i < 8; i++) GOST_OUT(i) = 0; \
+        barrier(CLK_LOCAL_MEM_FENCE); \
         \
         sph_u64 t_mem[8], K_mem[8];\
         sph_u64 *K, *t;\
         K = K_mem;\
         t = t_mem;\
         unsigned char *ucstate, *ucK;\
-        const sph_u64 *NN;\
+        const sph_u64 *NNN;\
         sph_u64 *hh;\
         const sph_u64 *mm;\
         int t_addm=0;\
         \
         sph_u64 return_state_mem[8];\
 	sph_u64 *return_state;\
-	sph_u64 r;\
         sph_u64 *tmp;\
         return_state = return_state_mem;\
         \
-        _Pragma("unroll") for (int i = 0; i < 64; i++) m[i] = msg[i]; \
-        GOST_G_N(N,hash,m);\
+        GOST_G_N(N,out,m);\
         GOST_ADDMODULO512(N,v512,N);\
         GOST_ADDMODULO512(Sigma,m,Sigma);\
         \
         _Pragma("unroll") for (int i = 0; i < 64; i++) m[i] = 0; \
 	m[63] = 1;\
         \
-	GOST_G_N(N,hash,m);\
+	GOST_G_N(N,out,m);\
 	v512[63] = 0 & 0xFF;\
 	v512[62] = 0 >> 8;\
         GOST_ADDMODULO512(N,v512,N);\
         GOST_ADDMODULO512(Sigma,m,Sigma);\
-	GOST_G_N(v0,hash,N);\
-	GOST_G_N(v0,hash,Sigma);\
-	_Pragma("unroll") for (int i = 0; i < 64; i++) outc[i] = hash[i]; \
+	_Pragma("unroll") for (int i = 0; i < 64; i++) v512[i] = 0; \
+	GOST_G_N(v512,out,N);\
+	GOST_G_N(v512,out,Sigma);\
 } while(0)
 
 #define GOST_HASH_512(message,out) do {\
