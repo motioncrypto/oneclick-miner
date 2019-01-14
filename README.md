@@ -1,18 +1,19 @@
-# Motion Miner v2.0.0
+# Motion Miner v2.1.0
 
 > Motion miner with just one click - Nvidia and AMD over Windows.
 
 ![Motion Miner](https://i.imgur.com/A0Bzx08.png "Motion Miner")
 
+#### NEW IN v2.1.0
+
+- Support for GeForce RTX 20x0 cards
+- Z-ENEMY 1.28 nVidia miner updated (Requires at least GeForce drivers ver 411+)
+- sgminer-kl 1.0.9 AMD miner updated
+- updated mining pools
+
 #### NVIDIA ADVISE
 
-- Currently only works with CUDA 9.1 drivers. Please update your drivers [http://www.nvidia.com/Download/index.aspx](here)
-
-#### To do
-
-- [X] Custom pools
-- [X] AMD Graphics support (beta)
-- [X] Integration with Pools API
+- Currently only works with CUDA 10 drivers. Please update your drivers to at least ver 411+ [http://www.nvidia.com/Download/index.aspx](here)
 
 #### Troubleshootings
 
