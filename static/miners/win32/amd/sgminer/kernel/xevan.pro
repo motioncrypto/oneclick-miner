@@ -90,7 +90,7 @@ typedef int sph_s32;
 ulong FAST_ROTL64_LO(const uint2 x, const uint y) { return(as_ulong(amd_bitalign(x, x.s10, 32 - y))); }
 ulong FAST_ROTL64_HI(const uint2 x, const uint y) { return(as_ulong(amd_bitalign(x.s10, x, 32 - (y - 32)))); }
 ulong ROTL64_1(const uint2 vv, const int r) { return as_ulong(amd_bitalign((vv).xy, (vv).yx, 32 - r)); }
-ulong ROTL64_2(const uint2 vv, const int r) { return as_ulong((amd_bitalign((vv).yx, (vv).xy, 32 - (r - 32)))); }
+ulong ROTL64_2(const uint2 vv, const int r) { return as_ulong((amd_bitalign((vv).yx, (vv).xy, 64 - r))); }
 
 #define VSWAP8(x)	(((x) >> 56) | (((x) >> 40) & 0x000000000000FF00UL) | (((x) >> 24) & 0x0000000000FF0000UL) \
           | (((x) >>  8) & 0x00000000FF000000UL) | (((x) <<  8) & 0x000000FF00000000UL) \
@@ -355,7 +355,7 @@ void groestlkernel(__global hash_t *hash,__local ulong *T0,__local ulong *T1,__l
 	mem_fence(CLK_GLOBAL_MEM_FENCE);
 }
 
-void skeinkernel(__global hash_t *hash)
+void skeinkernel(uint gid, __global hash_t *hash)
 {
   // skein
   sph_u64 h0 = SPH_C64(0x4903ADFF749C51CE), h1 = SPH_C64(0x0D95DE399746DF03), h2 = SPH_C64(0x8FD1934127C79BCE), h3 = SPH_C64(0x9A255629FF352CB1), h4 = SPH_C64(0x5DB62599DF6CA7B0), h5 = SPH_C64(0xEABE394CA9D5C3F4), h6 = SPH_C64(0x991112C71A75B523), h7 = SPH_C64(0xAE18A40B660FCC33);
@@ -391,6 +391,8 @@ void skeinkernel(__global hash_t *hash)
   hash->h8[5] = SWAP8(h5);
   hash->h8[6] = SWAP8(h6);
   hash->h8[7] = SWAP8(h7);
+  
+  if (!gid) printf("SK80 %02x..%02x\n", (uint) ((uchar*)&hash->h8)[0], (uint) ((uchar*)&hash->h8)[7]);
 
   barrier(CLK_GLOBAL_MEM_FENCE);
 }
@@ -1656,7 +1658,7 @@ __kernel void search3(__global hash_t* hashes)
   uint gid = get_global_id(0);
   __global hash_t *hash = &(hashes[gid-get_global_offset(0)]);
 
-  skeinkernel(hash);
+  skeinkernel(gid, hash);
 }
 
 __attribute__((reqd_work_group_size(WORKSIZE, 1, 1)))
@@ -1899,7 +1901,7 @@ __kernel void search20(__global hash_t* hashes)
   uint gid = get_global_id(0);
   __global hash_t *hash = &(hashes[gid-get_global_offset(0)]);
 
-  skeinkernel(hash);
+  skeinkernel(gid, hash);
 }
 
 __attribute__((reqd_work_group_size(WORKSIZE, 1, 1)))
